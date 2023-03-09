@@ -397,6 +397,7 @@ const promptUser = () => {
             if(error) throw error;
             let employeeNames = [];
             response.forEach((employee) => {employeeNames.push(`${employee.first_name} ${employee.last_name}`);});
+            employeeNames.push('No Manager');
 
             inquirer
             .prompt ([
@@ -422,14 +423,14 @@ const promptUser = () => {
                         employeeId = employee.id;
                     }
 
-                    if (
-                        answer.newManager === `${employee.first_name} ${employee.last_name}`
-                    ) {
-                        managerId = employee.id;
-                    }
+                    if (answer.newManager === `No Manager`)
+                        {managerId = null;
+                    } else if (answer.newManager === `${employee.first_name} ${employee.last_name}`)
+                    {managerId = employee.id;}
                 });
             if (answer.selectedEmployee === answer.newManager) {
                 console.log("Invalid Manager Selection");
+                updateEmployeeManager();
             } else {
                 let sql = `UPDATE employee SET employee.manager_id = ? WHERE employee.id = ?`;
                 connection.query(sql, [managerId, employeeId], (error) => {
@@ -470,9 +471,11 @@ const promptUser = () => {
 
                 let sql = `DELETE FROM department where department.id = ?`;
                 connection.query(sql, [departmentId], (error) => {
-                    if (error) throw error;
-                    console.log("Department successfully Removed!");
-                    viewAllDepartments();
+                    if (error) {
+                        console.log("\n \n ERROR: Cannot remove Department if an Employee still works it \n \n");
+                        viewAllEmployees();
+                    } else {(console.log("Department successfully Removed!")) 
+                    viewAllDepartments();}
                 });
             });
         });
@@ -504,9 +507,11 @@ const promptUser = () => {
 
                 let sql = `DELETE FROM role where role.id = ?`;
                 connection.query(sql, [roleId], (error) => {
-                    if (error) throw error;
-                    console.log("Role successfully Removed!");
-                    viewAllRoles();
+                    if (error) {
+                        console.log("\n \n ERROR: Cannot remove role if an Employee still works it \n \n");
+                        viewAllEmployees();
+                    } else {(console.log("Role successfully Removed!")) 
+                    viewAllRoles();}
                 });
             });
         });
