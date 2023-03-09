@@ -19,7 +19,10 @@
   },
   "homepage": "https://github.com/mariahw4/12-employee-tracker#readme",
   "dependencies": {
+    "console.table": "^0.10.0",
     "dotenv": "^16.0.3",
-    "inquirer": "^8.2.4"
+    "inquirer": "^8.2.4",
+    "mysql": "^2.18.1",
+    "mysql2": "^3.2.0"
   }
 }

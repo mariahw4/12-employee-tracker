@@ -1,7 +1,7 @@
 const mysql = require('mysql2');
 require("dotenv").config();
 
-const db = mysql.createConnection(
+const connection = mysql.createConnection(
     {
       host: '127.0.0.1',
       // MySQL username,
@@ -13,7 +13,4 @@ const db = mysql.createConnection(
     console.log(`Connected to the company_db database.`)
   );
   
-
-
-
 module.exports = connection;
