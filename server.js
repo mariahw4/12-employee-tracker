@@ -444,12 +444,108 @@ const promptUser = () => {
 
 // -------------------------------REMOVING COMPONENTS---------------------
     // 'Remove Department',
-    
+    const removeDepartment = async () => {
+        let sql = `SELECT department.id, department.name FROM department`;
+        await connection.execute(sql, (error, response) => {
+            if(error) throw error;
+            let allDepartments = [];
+            response.forEach((department) => {allDepartments.push(department.name);});
+
+            inquirer
+            .prompt ([
+                {
+                    name: "selectedDepartment",
+                    type: "list",
+                    message: "Which Department would you like to remove?",
+                    choices: allDepartments
+                },
+            ])
+            .then((answer) => {
+                let departmentId;
+
+                response.forEach((department) => {
+                    if (answer.selectedDepartment === department.name)
+                    {departmentId = department.id};
+                });
+
+                let sql = `DELETE FROM department where department.id = ?`;
+                connection.query(sql, [departmentId], (error) => {
+                    if (error) throw error;
+                    console.log("Department successfully Removed!");
+                    viewAllDepartments();
+                });
+            });
+        });
+    };
     // 'Remove Role',
-    
+    const removeRole = async () => {
+        let sql = `SELECT role.id, role.title FROM role`;
+        await connection.execute(sql, (error, response) => {
+            if(error) throw error;
+            let allRoles = [];
+            response.forEach((role) => {allRoles.push(role.title);});
+
+            inquirer
+            .prompt ([
+                {
+                    name: "selectedRole",
+                    type: "list",
+                    message: "Which role would you like to remove?",
+                    choices: allRoles
+                },
+            ])
+            .then((answer) => {
+                let roleId;
+
+                response.forEach((role) => {
+                    if (answer.selectedRole === role.title)
+                    {roleId = role.id};
+                });
+
+                let sql = `DELETE FROM role where role.id = ?`;
+                connection.query(sql, [roleId], (error) => {
+                    if (error) throw error;
+                    console.log("Role successfully Removed!");
+                    viewAllRoles();
+                });
+            });
+        });
+    };
+
     // 'Remove Employee',
+    const removeEmployee = async () => {
+        let sql = `SELECT employee.id, employee.first_name, employee.last_name FROM employee`;
+        await connection.execute(sql, (error, response) => {
+            if(error) throw error;
+            let employeeNames = [];
+            response.forEach((employee) => {employeeNames.push(`${employee.first_name} ${employee.last_name}`);});
 
+            inquirer
+            .prompt ([
+                {
+                    name: "selectedEmployee",
+                    type: "list",
+                    message: "Which employee would you like to remove?",
+                    choices: employeeNames
+                },
+            ])
+            .then((answer) => {
+                let employeeId;
 
+                response.forEach((employee) => {
+                    if (answer.selectedEmployee === `${employee.first_name} ${employee.last_name}`)
+                    {employeeId = employee.id};
+                });
+
+                let sql = `DELETE FROM employee where employee.id = ?`;
+                connection.query(sql, [employeeId], (error) => {
+                    if (error) throw error;
+                    console.log("Employee successfully Removed!");
+                    viewAllEmployees();
+                });
+            });
+        });
+    };
 
 // ----------------------AND EXIT!!------------------------------
     // 'Exit'
