@@ -2,7 +2,7 @@ const connection = require("./config/connection");
 const inquirer = require("inquirer");
 const consoleTable = require("console.table");
 
-console.log("Employee Tracker by Mariah Wear")
+console.log("\n \n Employee Tracker by Mariah Wear \n \n")
 
 
 const promptUser = () => {
@@ -13,20 +13,20 @@ const promptUser = () => {
           message: 'Please select an option:',
           choices: [
             'View All Departments',
-            'View All Roles',
-            'View All Employees',
-            'View All Employees By Department',
-            'View All Employees By Manager',
+            'Add Department',           
             'View Department Budgets',
-            'Add Department',
-            'Add Role',
+            'Remove Department',
+            'View All Employees',
             'Add Employee',
             'Update Employee Role',
             'Update Employee Manager',
-            'Remove Department',
-            'Remove Role',
+            'View All Employees By Department',
+            'View All Employees By Manager',
             'Remove Employee',
-            'Exit'
+            'View All Roles',
+            'Add Role',
+            'Remove Role',
+            '---Exit---'
             ]
         }
       ])
@@ -75,7 +75,7 @@ const promptUser = () => {
         if (choices === 'Remove Employee') {
             removeEmployee();
         }
-        if (choices === 'Exit') {
+        if (choices === '---Exit---') {
             connection.end();
         }
       });
@@ -83,11 +83,11 @@ const promptUser = () => {
 // --------------------VIEWING COMPONENTS--------------
     // view all departments
     const viewAllDepartments = async () => {
-        const sql = `SELECT department.id AS id, 
-                    department.name AS department FROM department`;
+        const sql = `SELECT department.id AS ID, 
+                    department.name AS Department FROM department`;
         await connection.execute(sql, (error, response) => {
             if (error) throw error;
-            console.log("All Departments:")
+            console.log("\n \nAll Departments:\n \n")
             console.table(response);
             promptUser();
         })
@@ -102,7 +102,7 @@ const promptUser = () => {
                         INNER JOIN department ON role.department_id = department.id`;
         await connection.execute(sql, (error, response) => {
             if (error) throw error;
-            console.log("Current Employee Roles")
+            console.log("\n \n Current Employee Roles: \n \n")
             console.table(response);
             promptUser();
         });
@@ -110,16 +110,18 @@ const promptUser = () => {
 
     // view all employees
     const viewAllEmployees = async () => {
-        const sql = `SELECT employee.id, 
-                        employee.first_name, 
-                        employee.last_name,
-                        role.title,
-                        department.name AS department,
-                        role.salary FROM employee, role, department 
-                        WHERE department.id = role.department_id AND role.id = employee.role_id 
-                        ORDER BY employee.id`;
+        const sql = `SELECT employee.id AS ID, 
+                        CONCAT(employee.first_name, " ", employee.last_name) AS Employee,
+                        role.title AS Title,
+                        department.name AS Department,
+                        role.salary AS Salary,
+                        CONCAT(boss.first_name, " ", boss.last_name) AS Manager 
+                        FROM employee JOIN role ON employee.role_id = role.id
+                        JOIN department ON role.department_id = department.id
+                        LEFT JOIN employee AS boss ON boss.id = employee.manager_id`;
         await connection.execute(sql, (error, response) => {
             if (error) throw error;
+            console.log("\n \n Current Employees: \n \n")
             console.table(response);
             promptUser();
         });
@@ -127,14 +129,13 @@ const promptUser = () => {
 
     // 'View All Employees By Department',
     const viewAllEmployeesbyDepartment = async () => {
-        const sql = `SELECT department.name AS department,
-                    employee.first_name, 
-                    employee.last_name
-                    FROM employee 
-                    LEFT JOIN role ON employee.role_id = role.id 
-                    LEFT JOIN department ON role.department_id = department.id`;
+        const sql = `SELECT department.name AS Department,
+                    CONCAT(employee.first_name, " ", employee.last_name) AS Employee
+                    FROM employee JOIN role ON employee.role_id = role.id 
+                    JOIN department ON role.department_id = department.id`;
         await connection.execute(sql, (error, response) => {
             if (error) throw error;
+            console.log("\n \n Current Employees by Department: \n \n")
             console.table(response);
             promptUser();
         });
@@ -142,13 +143,14 @@ const promptUser = () => {
 
     // 'View All Employees By Manager',
     const viewAllEmployeesbyManager = async () => {
-        const sql = `SELECT employee.manager_id,
-                    employee.first_name, 
-                    employee.last_name 
-                    FROM employee 
+        const sql = `SELECT CONCAT(boss.first_name, " ", boss.last_name) AS Manager,
+                    CONCAT(employee.first_name, " ", employee.last_name) AS Employee
+                    FROM employee  
+                    LEFT JOIN employee AS boss ON boss.id = employee.manager_id
                     ORDER BY employee.manager_id = employee.id`;
         await connection.execute(sql, (error, response) => {
             if (error) throw error;
+            console.log("\n \n Current Employees By Manager: \n \n")
             console.table(response);
             promptUser();
         });
@@ -156,14 +158,13 @@ const promptUser = () => {
 
     // 'View Department Budgets',
     const viewDepartmentBudget = async () => {
-        const sql = `SELECT department_id AS id, 
-                    department.name AS department,
-                    SUM(salary) AS budget
-                    FROM role 
-                    INNER JOIN department ON role.department_id = department.id
+        const sql = `SELECT department.name AS Department,
+                    SUM(salary) AS Budget
+                    FROM role JOIN department ON role.department_id = department.id
                     GROUP BY role.department_id`;
         await connection.execute(sql, (error, response) => {
             if (error) throw error;
+            console.log("\n \n Current Department Budgets: \n \n")
             console.table(response);
             promptUser();
         });
@@ -272,7 +273,7 @@ const promptUser = () => {
             {
                 name: 'firstName',
                 type: 'input',
-                message: 'What is the employees first name?',
+                message: "What is the employee's first name?",
                 validate: function (answer) {
                     if (answer.length <1) {
                         return console.log("A valid first name is required")
@@ -283,7 +284,7 @@ const promptUser = () => {
             {
                 name: 'lastName',
                 type: 'input',
-                message: 'What is the employees last name?',
+                message: "What is the employee's last name?",
                 validate: function (answer) {
                     if (answer.length <1) {
                         return console.log("A valid last name is required")
@@ -303,30 +304,46 @@ const promptUser = () => {
                     {
                         name: 'role',
                         type: 'list',
-                        message: 'What is the employees Role?',
+                        message: "What is the employee's Role?",
                         choices: roles
                     },
                 ])
                 .then((roleSelection) => {
                     const role = roleSelection.role;
                     crit.push(role);
-                    const managerSelection = `SELECT * FROM employee`;
+                    const managerSelection = `SELECT employee.id, employee.first_name, employee.last_name, employee.manager_id FROM employee`;
                     connection.query(managerSelection, (error, response) => {
                         if(error) throw error;
-                        const managers = response.map(({ id}) => ({ value: id }));
+                        let managers = []
+                        response.forEach((employee) => {managers.push(`${employee.first_name} ${employee.last_name}`);});
+                        console.log("managers = ", managers);
+                    
                         inquirer
                         .prompt ([
                             {
                                 name: 'manager',
                                 type: 'list',
-                                message: 'Who is the employees manager?',
+                                message: "Who is the employee's manager?",
                                 choices: managers
                             },
                         ])
-                        .then(managerChoice => {
-                            const manager = managerChoice.manager;
-                            crit.push(manager);
-                            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)`;
+                        .then((answer) => {
+                            let managerId, employeeId;
+                            response.forEach((employee) => {
+                                if (
+                                    answer.manager === `${employee.first_name} ${employee.last_name}`
+                                ) {
+                                    employeeId = employee.id;
+                                }
+            
+                                if (answer.manager === `No Manager`)
+                                    {managerId = null;
+                                } else if (answer.manager === `${employee.first_name} ${employee.last_name}`)
+                                {managerId = employee.id;}
+                            });
+                            crit.push(managerId);
+                            console.log("Crit ==", crit)
+                            const sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)`;
                             connection.query(sql, crit, (error) => {
                                 if (error) throw error;
                                 console.log("Employee successfully added!!")
@@ -449,9 +466,7 @@ const promptUser = () => {
         let sql = `SELECT department.id, department.name FROM department`;
         await connection.execute(sql, (error, response) => {
             if(error) throw error;
-            let allDepartments = [];
-            response.forEach((department) => {allDepartments.push(department.name);});
-
+            const allDepartments = response.map(({id, name}) => ({value: id, name: name}));
             inquirer
             .prompt ([
                 {
@@ -462,15 +477,15 @@ const promptUser = () => {
                 },
             ])
             .then((answer) => {
-                let departmentId;
-
+                let departmentName;
+                    console.log("Selected department", answer.selectedDepartment);
                 response.forEach((department) => {
-                    if (answer.selectedDepartment === department.name)
-                    {departmentId = department.id};
+                    if (answer.selectedDepartment === department.id)
+                    {departmentName = department.name};
                 });
 
-                let sql = `DELETE FROM department where department.id = ?`;
-                connection.query(sql, [departmentId], (error) => {
+                let sql = `DELETE FROM department WHERE department.name = ?`;
+                connection.query(sql, [departmentName], (error) => {
                     if (error) {
                         console.log("\n \n ERROR: Cannot remove Department if an Employee still works it \n \n");
                         viewAllEmployees();
