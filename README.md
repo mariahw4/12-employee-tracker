@@ -58,9 +58,9 @@ Database structure - ![](./assets/images/12-sql-homework-demo-01.png)
 
 ### Links
 
-- Solution URL: [Github Repository Link](https://your-solution-url.com)
-- Brief gif of functionality: ![] ()
-- Walk through Video: [Click to view full video](https://your-live-site-url.com)
+- Solution URL: [Github Repository Link](https://github.com/mariahw4/12-employee-tracker)
+- Brief gif of functionality: ![](./assets/images/gif%20-%20employee%20tracker.gif)
+- Walk through Video: [Click to view full video](https://drive.google.com/file/d/1HOQxQldA1FVbHPTqfpyGFcdn-UJ2sTP5/view)
 
 ## My process
 
